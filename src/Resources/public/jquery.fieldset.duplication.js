@@ -4,12 +4,12 @@
 
     $.fn.fieldsetDuplication = function(settings)
     {
-        var defaults = { 
+        var defaults = {
             prepend: false,
             buttonAdd: '+',
-            buttonRemove: '&times;'
+            buttonRemove: '&times;',
+            widgetSelector: '.widget',
         };
-        var options  = $.extend({}, defaults, settings);
 
         $(this).each(function(i, e)
         {
@@ -18,6 +18,7 @@
             var selector = null;
             var maxRows = null;
             var duplicateIndex = 0;
+            var options = $.extend({}, defaults, settings, $original.data('fieldset-duplication-config') || {})
 
             // determine the fieldset group selector
             var classList = $original.attr('class').split(/\s+/);
@@ -68,7 +69,7 @@
 
                 // clone the fieldset
                 var $clone = $fieldset.clone();
-                
+
                 duplicateIndex++;
 
                 const nameMap = {};
@@ -86,7 +87,7 @@
                         }
                         var newId = oldId + '_duplicate_' + duplicateIndex;
 
-                        $input.closest('.widget').find('label[for="'+$input.attr('id')+'"]').each(function() {
+                        $input.closest(options.widgetSelector).find('label[for="'+$input.attr('id')+'"]').each(function() {
                             var $label = $(this);
                             $label.attr('for', newId);
 
@@ -113,8 +114,8 @@
                     var value = $input.attr('value');
 
                     if ($input.attr('type') !== 'checkbox' && $input.attr('type') !== 'radio' ) {
-                        if ($input.val() && typeof value !== 'undefined' && value !== false && ($input.val() !== value || $fieldset.hasClass('duplicate-fieldset-donotcopy'))) {
-                            $input.val('');
+                        if ($input.val() && $fieldset.hasClass('duplicate-fieldset-donotcopy')) {
+                            $input.val(value);
                         }
                     } else {
                         $input.not('[checked]').prop('checked', false);
@@ -135,7 +136,7 @@
                 // remove some other stuff
                 $clone.find('label').removeClass('error');
                 $clone.find('p.error').remove();
-                $clone.find('.widget').removeClass('error');
+                $clone.find(options.widgetSelector).removeClass('error');
 
                 // set as duplicate
                 $clone.addClass('duplicate');
@@ -148,7 +149,7 @@
 
                 // update the fieldset list
                 updateFieldsets();
-                
+
                 // disable the 'add' button if no additional row is allowed
                 if (maxRows != null && $fieldsets.length >= maxRows)
                 {
